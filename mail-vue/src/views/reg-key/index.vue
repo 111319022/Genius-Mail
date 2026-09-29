@@ -269,7 +269,7 @@ async function copyCode(code) {
   } catch (err) {
     console.error('复制失败:', err);
     ElMessage({
-      message: '复制失败',
+      message: '複製失敗',
       type: 'error',
       plain: true,
     })

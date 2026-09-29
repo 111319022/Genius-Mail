@@ -266,9 +266,9 @@ const dbInit = {
 
 	async v1_6DB(c) {
 
-		const noticeContent = '本项目仅供学习交流，禁止用于违法业务\n' +
+		const noticeContent = '本專案僅供學習交流，禁止用於違法用途\n' +
 			'<br>\n' +
-			'请遵守当地法规，作者不承担任何法律责任'
+			'請遵守當地法規，作者不承擔任何法律責任'
 
 		const ADD_COLUMN_SQL_LIST = [
 			`ALTER TABLE setting ADD COLUMN reg_verify_count INTEGER NOT NULL DEFAULT 1;`,
@@ -568,7 +568,7 @@ const dbInit = {
         INSERT INTO role (
           role_id, name, key, create_time, sort, description, user_id, is_default, send_count, send_type, account_count
         ) VALUES (
-          1, '普通用户', NULL, '0000-00-00 00:00:00', 0, '只有普通使用权限', 0, 1, NULL, 'ban', 10
+          1, '一般使用者', NULL, '0000-00-00 00:00:00', 0, '只有一般使用權限', 0, 1, NULL, 'ban', 10
         )
       `).run();
 		}
