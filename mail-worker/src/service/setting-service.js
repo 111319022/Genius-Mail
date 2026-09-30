@@ -89,6 +89,7 @@ const settingService = {
 		settingRow.tgBotToken = settingRow.tgBotToken ? `${settingRow.tgBotToken.slice(0, 20)}******` : null;
 		settingRow.hasR2 = !!c.env.r2
 		settingRow.hasCfEmail = !!c.env.email
+		settingRow.resendQuota = await c.env.kv.get(KvConst.RESEND_QUOTA, { type: 'json' });
 
 		let regVerifyOpen = false
 		let addVerifyOpen = false

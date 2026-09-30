@@ -24,6 +24,8 @@ const zh = {
 	senderAccountNotExist: '寄件人信箱不存在',
 	noResendToken: 'Resend未設定，只能給站內信箱寄件',
 	noSendProvider: '發信服務未設定，只能給站內信箱寄件',
+	resendDailyQuota: 'Resend 今日寄信額度已用完（每日 UTC 0 點，台灣時間早上 8 點重置）',
+	resendMonthlyQuota: 'Resend 本月寄信額度已用完',
 	sendEmailNotCurUser: '寄件人信箱非當前使用者所有',
 	notExistEmailReply: '郵件不存在無法回覆',
 	imageAttLimit: '圖片不能超過10個',

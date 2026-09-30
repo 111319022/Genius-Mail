@@ -211,6 +211,21 @@
                   </el-button>
                 </div>
               </div>
+              <div class="setting-item" v-if="!setting.hasCfEmail">
+                <div>
+                  <span>{{ $t('resendQuota') }}</span>
+                  <el-tooltip effect="dark" :content="$t('resendQuotaDesc')">
+                    <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+                  </el-tooltip>
+                </div>
+                <div>
+                  <span v-if="!setting.resendQuota">{{ $t('resendQuotaNone') }}</span>
+                  <template v-else>
+                    <span v-if="setting.resendQuota.daily !== null" style="margin-right: 10px">{{ $t('resendQuotaDaily', { used: setting.resendQuota.daily, limit: 100 }) }}</span>
+                    <span v-if="setting.resendQuota.monthly !== null">{{ $t('resendQuotaMonthly', { used: setting.resendQuota.monthly, limit: 3000 }) }}</span>
+                  </template>
+                </div>
+              </div>
               <div class="setting-item">
                 <div><span>{{ $t('blackList') }}</span></div>
                 <div>

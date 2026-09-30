@@ -390,6 +390,17 @@ const emailService = {
 
 		const { data, error } = sendResult;
 
+		if (!allInternal && !useCloudflareEmail) {
+			await this.saveResendQuota(c, sendResult.headers);
+		}
+
+		if (error?.name === 'daily_quota_exceeded') {
+			throw new BizError(t('resendDailyQuota'), 429);
+		}
+
+		if (error?.name === 'monthly_quota_exceeded') {
+			throw new BizError(t('resendMonthlyQuota'), 429);
+		}
 
 		if (error) {
 			throw new BizError(error.message);
@@ -506,6 +517,22 @@ const emailService = {
 				id: result.messageId
 			}
 		};
+	},
+
+	//记录 Resend 响应头里的已用额度，供管理员在系统设置查看
+	async saveResendQuota(c, headers) {
+		const daily = parseInt(headers?.['x-resend-daily-quota']);
+		const monthly = parseInt(headers?.['x-resend-monthly-quota']);
+
+		if (isNaN(daily) && isNaN(monthly)) {
+			return;
+		}
+
+		await c.env.kv.put(kvConst.RESEND_QUOTA, JSON.stringify({
+			daily: isNaN(daily) ? null : daily,
+			monthly: isNaN(monthly) ? null : monthly,
+			time: new Date().toISOString()
+		}));
 	},
 
 	async sendByResend(resendToken, params) {
