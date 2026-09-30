@@ -156,6 +156,7 @@ const zh = {
     resendQuota: 'Resend 已用額度',
     resendQuotaDaily: '今日 {used}/{limit}',
     resendQuotaMonthly: '本月 {used}/{limit}',
+    resendQuotaRefresh: '重新整理',
     resendQuotaNone: '尚無紀錄',
     resendQuotaDesc: '每次寄信後更新。免費方案每日 100 封（UTC 0 點，台灣時間早上 8 點重置）、每月 3,000 封；收件人 To/CC/BCC 每人算一封',
     cloudflareEmailSending: 'Cloudflare 郵件傳送',

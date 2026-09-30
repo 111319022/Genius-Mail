@@ -19,7 +19,7 @@
       <div class="notice icon-item" @click="openNotice">
         <Icon icon="streamline-plump:announcement-megaphone"/>
       </div>
-      <el-dropdown trigger="click" :teleported="false" popper-class="detail-dropdown">
+      <el-dropdown trigger="click" :teleported="false" popper-class="detail-dropdown" @visible-change="onDropdownVisible">
         <div class="avatar">
           <div class="avatar-text">
             <div>{{ formatName(userStore.user.email) }}</div>
@@ -62,6 +62,25 @@
                 </div>
               </div>
             </div>
+            <div class="resend-quota" v-if="resendQuotaData.enabled">
+              <div class="resend-quota-head">
+                <span>{{ $t('resendQuota') }}</span>
+                <el-tooltip effect="dark" :content="$t('resendQuotaDesc')">
+                  <Icon class="resend-quota-tip" icon="fe:warning" width="16" height="16"/>
+                </el-tooltip>
+                <el-button class="resend-quota-refresh" :loading="quotaLoading" size="small" type="primary"
+                           :title="$t('resendQuotaRefresh')" @click="loadResendQuota">
+                  <Icon icon="ion:reload" width="14" height="14"/>
+                </el-button>
+              </div>
+              <div class="resend-quota-body">
+                <span v-if="!resendQuotaData.quota">{{ $t('resendQuotaNone') }}</span>
+                <template v-else>
+                  <span v-if="resendQuotaData.quota.daily !== null">{{ $t('resendQuotaDaily', { used: resendQuotaData.quota.daily, limit: 100 }) }}</span>
+                  <span v-if="resendQuotaData.quota.monthly !== null">{{ $t('resendQuotaMonthly', { used: resendQuotaData.quota.monthly, limit: 3000 }) }}</span>
+                </template>
+              </div>
+            </div>
             <div class="logout">
               <el-button type="primary" :loading="logoutLoading" @click="clickLogout">{{ $t('logOut') }}</el-button>
             </div>
@@ -85,6 +104,7 @@ import {useSettingStore} from "@/store/setting.js";
 import {hasPerm} from "@/perm/perm.js"
 import {useI18n} from "vue-i18n";
 import {setExtend} from "@/utils/day.js"
+import {resendQuota} from "@/request/setting.js";
 
 const {t} = useI18n();
 const route = useRoute();
@@ -92,6 +112,27 @@ const settingStore = useSettingStore();
 const userStore = useUserStore();
 const uiStore = useUiStore();
 const logoutLoading = ref(false)
+
+const resendQuotaData = ref({ enabled: false, quota: null })
+const quotaLoading = ref(false)
+
+function loadResendQuota() {
+  if (!hasPerm('setting:query')) {
+    return
+  }
+  quotaLoading.value = true
+  resendQuota().then(data => {
+    resendQuotaData.value = data
+  }).finally(() => {
+    quotaLoading.value = false
+  })
+}
+
+function onDropdownVisible(visible) {
+  if (visible) {
+    loadResendQuota()
+  }
+}
 
 const accountCount = computed(() => {
   return userStore.user.role.accountCount
@@ -313,6 +354,35 @@ function formatName(email) {
     text-align: center;
     color: var(--regular-text-color);
     cursor: pointer;
+  }
+
+  .resend-quota {
+    width: 100%;
+    margin-top: 14px;
+    font-size: 13px;
+
+    .resend-quota-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .resend-quota-tip {
+      color: var(--regular-text-color);
+      cursor: pointer;
+    }
+
+    .resend-quota-refresh {
+      margin-left: auto;
+      padding: 4px 8px;
+    }
+
+    .resend-quota-body {
+      margin-top: 6px;
+      display: flex;
+      gap: 12px;
+      color: var(--regular-text-color);
+    }
   }
 
   .logout {

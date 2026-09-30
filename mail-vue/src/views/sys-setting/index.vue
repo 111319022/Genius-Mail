@@ -218,12 +218,16 @@
                     <Icon class="warning" icon="fe:warning" width="18" height="18"/>
                   </el-tooltip>
                 </div>
-                <div>
+                <div class="forward">
                   <span v-if="!setting.resendQuota">{{ $t('resendQuotaNone') }}</span>
                   <template v-else>
                     <span v-if="setting.resendQuota.daily !== null" style="margin-right: 10px">{{ $t('resendQuotaDaily', { used: setting.resendQuota.daily, limit: 100 }) }}</span>
                     <span v-if="setting.resendQuota.monthly !== null">{{ $t('resendQuotaMonthly', { used: setting.resendQuota.monthly, limit: 3000 }) }}</span>
                   </template>
+                  <el-button class="opt-button" style="margin-top: 0" :loading="quotaLoading" size="small"
+                             type="primary" :title="$t('resendQuotaRefresh')" @click="refreshResendQuota">
+                    <Icon icon="ion:reload" width="16" height="16"/>
+                  </el-button>
                 </div>
               </div>
               <div class="setting-item">
@@ -955,7 +959,7 @@ Authorization: &lt;secret&gt;</pre>
 
 <script setup>
 import {computed, defineOptions, nextTick, reactive, ref} from "vue";
-import {deleteBackground, setBackground, setBlackList, settingQuery, settingSet} from "@/request/setting.js";
+import {deleteBackground, resendQuota, setBackground, setBlackList, settingQuery, settingSet} from "@/request/setting.js";
 import {useSettingStore} from "@/store/setting.js";
 import {useUiStore} from "@/store/ui.js";
 import {useUserStore} from "@/store/user.js";
@@ -1123,6 +1127,17 @@ const tgMsgLabelWidth = computed(() => locale.value === 'en' ? '120px' : '100px'
 
 getSettings()
 getUpdate()
+
+const quotaLoading = ref(false)
+
+function refreshResendQuota() {
+  quotaLoading.value = true
+  resendQuota().then(data => {
+    setting.value.resendQuota = data.quota
+  }).finally(() => {
+    quotaLoading.value = false
+  })
+}
 
 function getSettings() {
   settingReady.value = false

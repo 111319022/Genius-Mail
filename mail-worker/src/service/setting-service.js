@@ -66,6 +66,28 @@ const settingService = {
 		return setting;
 	},
 
+	//读取 Resend 已用额度；每日额度在 UTC 0 点重置、每月额度在 UTC 月初重置，跨期后旧数字视为 0
+	async resendQuota(c) {
+		const quota = await c.env.kv.get(KvConst.RESEND_QUOTA, { type: 'json' });
+
+		if (!quota) {
+			return null;
+		}
+
+		const saved = new Date(quota.time);
+		const now = new Date();
+
+		if (saved.toISOString().slice(0, 10) !== now.toISOString().slice(0, 10) && quota.daily !== null) {
+			quota.daily = 0;
+		}
+
+		if (saved.toISOString().slice(0, 7) !== now.toISOString().slice(0, 7) && quota.monthly !== null) {
+			quota.monthly = 0;
+		}
+
+		return quota;
+	},
+
 	async get(c, showSiteKey = false) {
 
 		const [settingRow, recordList] = await Promise.all([
@@ -89,7 +111,7 @@ const settingService = {
 		settingRow.tgBotToken = settingRow.tgBotToken ? `${settingRow.tgBotToken.slice(0, 20)}******` : null;
 		settingRow.hasR2 = !!c.env.r2
 		settingRow.hasCfEmail = !!c.env.email
-		settingRow.resendQuota = await c.env.kv.get(KvConst.RESEND_QUOTA, { type: 'json' });
+		settingRow.resendQuota = await this.resendQuota(c);
 
 		let regVerifyOpen = false
 		let addVerifyOpen = false

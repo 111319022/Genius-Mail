@@ -8,6 +8,10 @@ export function settingQuery() {
     return http.get('/setting/query')
 }
 
+export function resendQuota() {
+    return http.get('/setting/resendQuota')
+}
+
 export function websiteConfig() {
     return http.get('/setting/websiteConfig')
 }

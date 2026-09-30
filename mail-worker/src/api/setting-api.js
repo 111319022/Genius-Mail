@@ -13,6 +13,11 @@ app.get('/setting/query', async (c) => {
 	return c.json(result.ok(setting));
 });
 
+app.get('/setting/resendQuota', async (c) => {
+	const quota = await settingService.resendQuota(c);
+	return c.json(result.ok({ enabled: !c.env.email, quota }));
+});
+
 app.get('/setting/websiteConfig', async (c) => {
 	const setting = await settingService.websiteConfig(c);
 	return c.json(result.ok(setting));

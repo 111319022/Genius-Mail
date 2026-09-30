@@ -156,6 +156,7 @@ const en = {
     resendQuota: 'Resend Usage',
     resendQuotaDaily: 'Today {used}/{limit}',
     resendQuotaMonthly: 'Month {used}/{limit}',
+    resendQuotaRefresh: 'Refresh',
     resendQuotaNone: 'No data yet',
     resendQuotaDesc: 'Updated after each send. Free plan: 100/day (resets 00:00 UTC), 3,000/month; each To/CC/BCC recipient counts as one email',
     cloudflareEmailSending: 'Cloudflare Email Sending',
