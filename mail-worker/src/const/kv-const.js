@@ -4,7 +4,8 @@ const KvConst = {
 	SEND_DAY_COUNT: 'send_day_count:',
 	ANALYSIS_ECHARTS: 'analysis_echarts:',
 	PUBLIC_KEY: "public_key:",
-	RESEND_QUOTA: 'resend_quota:'
+	RESEND_QUOTA: 'resend_quota:',
+	PUSH_DEVICES: 'push_devices:'
 }
 
 export default KvConst;

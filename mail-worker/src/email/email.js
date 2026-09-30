@@ -12,6 +12,7 @@ import userService from '../service/user-service';
 import telegramService from '../service/telegram-service';
 import aiService from '../service/ai-service';
 import webhookService from '../service/webhook-service';
+import pushService from '../service/push-service';
 
 export async function email(message, env, ctx) {
 
@@ -163,6 +164,15 @@ export async function email(message, env, ctx) {
 		}
 
 		emailRow = await emailService.completeReceive({ env }, account ? emailConst.status.RECEIVE : emailConst.status.NOONE, emailRow.emailId);
+
+		//推送到 iOS App
+		if (account) {
+			try {
+				await pushService.sendNewEmail({ env }, emailRow);
+			} catch (e) {
+				console.error('APNs 推送失败: ', e);
+			}
+		}
 
 
 		if (ruleType === settingConst.ruleType.RULE) {

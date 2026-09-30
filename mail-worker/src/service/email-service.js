@@ -23,12 +23,13 @@ import domainUtils from '../utils/domain-uitls';
 import account from "../entity/account";
 import { att } from '../entity/att';
 import telegramService from './telegram-service';
+import pushService from './push-service';
 
 const emailService = {
 
 	async list(c, params, userId) {
 
-		let { emailId, type, accountId, size, timeSort, allReceive, full } = params;
+		let { emailId, type, accountId, size, timeSort, allReceive, full, keyword } = params;
 
 		size = Number(size);
 		type = Number(type);
@@ -65,8 +66,10 @@ const emailService = {
 			allReceive = accountRow.allReceive;
 		}
 
-		const filters = this.emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort });
-		const countFilters = this.emailListFilters({ userId, accountId, type, allReceive, withCursor: false });
+		keyword = keyword?.trim().slice(0, 100);
+
+		const filters = this.emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort, keyword });
+		const countFilters = this.emailListFilters({ userId, accountId, type, allReceive, keyword, withCursor: false });
 		const columns = full ? emailListColumns : emailBriefColumns;
 
 		const query = orm(c)
@@ -155,7 +158,7 @@ const emailService = {
 		return list;
 	},
 
-	emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort, withCursor = true }) {
+	emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort, keyword, withCursor = true }) {
 		const conditions = [
 			eq(email.userId, userId),
 			eq(email.type, type),
@@ -164,6 +167,17 @@ const emailService = {
 		];
 		if (!allReceive) {
 			conditions.push(eq(email.accountId, accountId));
+		}
+		if (keyword) {
+			const pattern = '%' + keyword.replace(/[\\%_]/g, char => '\\' + char) + '%';
+			conditions.push(or(
+				sql`${email.subject} LIKE ${pattern} ESCAPE '\\'`,
+				sql`${email.name} LIKE ${pattern} ESCAPE '\\'`,
+				sql`${email.sendEmail} LIKE ${pattern} ESCAPE '\\'`,
+				sql`${email.toEmail} LIKE ${pattern} ESCAPE '\\'`,
+				sql`${email.recipient} LIKE ${pattern} ESCAPE '\\'`,
+				sql`${email.text} LIKE ${pattern} ESCAPE '\\'`
+			));
 		}
 		if (withCursor && emailId) {
 			conditions.push(timeSort ? gt(email.emailId, emailId) : lt(email.emailId, emailId));
@@ -781,6 +795,14 @@ const emailService = {
 
 			const emailRow = await orm(c).insert(email).values(emailData).returning().get();
 
+			if (emailRow.status === emailConst.status.RECEIVE) {
+				try {
+					await pushService.sendNewEmail(c, emailRow);
+				} catch (e) {
+					console.error('站内邮件推送失败: ', e);
+				}
+			}
+
 			//设置附件保存
 			for (const attRow of attList) {
 				const attValues = {...attRow};
@@ -857,6 +879,37 @@ const emailService = {
 			and(eq(email.emailId, emailId),
 				eq(email.isDel, isDel.NORMAL)))
 			.get();
+	},
+
+	async detail(c, params, userId) {
+		const emailId = Number(params.emailId);
+
+		const emailRow = await orm(c).select({
+			...emailListColumns,
+			starId: star.starId
+		}).from(email)
+			.leftJoin(
+				star,
+				and(
+					eq(star.emailId, email.emailId),
+					eq(star.userId, userId)
+				)
+			)
+			.where(
+				and(
+					eq(email.emailId, emailId),
+					eq(email.userId, userId),
+					eq(email.isDel, isDel.NORMAL)
+				))
+			.get();
+
+		if (!emailRow) {
+			throw new BizError(t('notExistEmail'), 404);
+		}
+
+		emailRow.isStar = emailRow.starId != null ? 1 : 0;
+		await this.emailAddAtt(c, [emailRow]);
+		return emailRow;
 	},
 
 	async latest(c, params, userId) {

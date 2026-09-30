@@ -3,10 +3,21 @@ import emailService from '../service/email-service';
 import result from '../model/result';
 import userContext from '../security/user-context';
 import attService from '../service/att-service';
+import pushService from '../service/push-service';
 
 app.get('/email/list', async (c) => {
 	const data = await emailService.list(c, c.req.query(), userContext.getUserId(c));
 	return c.json(result.ok(data));
+});
+
+app.get('/email/detail', async (c) => {
+	const email = await emailService.detail(c, c.req.query(), userContext.getUserId(c));
+	return c.json(result.ok(email));
+});
+
+app.get('/email/unreadCount', async (c) => {
+	const total = await pushService.unreadCount(c, userContext.getUserId(c));
+	return c.json(result.ok({ total }));
 });
 
 app.get('/email/latest', async (c) => {
