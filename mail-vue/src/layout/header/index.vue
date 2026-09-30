@@ -68,16 +68,14 @@
                 <el-tooltip effect="dark" :content="$t('resendQuotaDesc')">
                   <Icon class="resend-quota-tip" icon="fe:warning" width="16" height="16"/>
                 </el-tooltip>
-                <el-button class="resend-quota-refresh" :loading="quotaLoading" size="small" type="primary"
-                           :title="$t('resendQuotaRefresh')" @click="loadResendQuota">
-                  <Icon icon="ion:reload" width="14" height="14"/>
-                </el-button>
+                <Icon class="resend-quota-refresh" :class="{ spinning: quotaLoading }" icon="ion:reload"
+                      width="16" height="16" :title="$t('resendQuotaRefresh')" @click="loadResendQuota"/>
               </div>
               <div class="resend-quota-body">
-                <span v-if="!resendQuotaData.quota">{{ $t('resendQuotaNone') }}</span>
+                <span v-if="!resendQuotaData.quota" class="resend-quota-empty">{{ $t('resendQuotaNone') }}</span>
                 <template v-else>
-                  <span v-if="resendQuotaData.quota.daily !== null">{{ $t('resendQuotaDaily', { used: resendQuotaData.quota.daily, limit: 100 }) }}</span>
-                  <span v-if="resendQuotaData.quota.monthly !== null">{{ $t('resendQuotaMonthly', { used: resendQuotaData.quota.monthly, limit: 3000 }) }}</span>
+                  <el-tag v-if="resendQuotaData.quota.daily !== null">{{ $t('resendQuotaDaily', { used: resendQuotaData.quota.daily, limit: 100 }) }}</el-tag>
+                  <el-tag v-if="resendQuotaData.quota.monthly !== null">{{ $t('resendQuotaMonthly', { used: resendQuotaData.quota.monthly, limit: 3000 }) }}</el-tag>
                 </template>
               </div>
             </div>
@@ -358,8 +356,13 @@ function formatName(email) {
 
   .resend-quota {
     width: 100%;
-    margin-top: 14px;
-    font-size: 13px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--el-border-color-lighter);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 
     .resend-quota-head {
       display: flex;
@@ -367,21 +370,35 @@ function formatName(email) {
       gap: 6px;
     }
 
-    .resend-quota-tip {
+    .resend-quota-tip,
+    .resend-quota-refresh {
       color: var(--regular-text-color);
       cursor: pointer;
     }
 
-    .resend-quota-refresh {
-      margin-left: auto;
-      padding: 4px 8px;
+    .resend-quota-refresh:hover {
+      color: var(--el-color-primary);
+    }
+
+    .resend-quota-refresh.spinning {
+      animation: resend-quota-spin 0.8s linear infinite;
     }
 
     .resend-quota-body {
-      margin-top: 6px;
       display: flex;
-      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .resend-quota-empty {
       color: var(--regular-text-color);
+    }
+  }
+
+  @keyframes resend-quota-spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 

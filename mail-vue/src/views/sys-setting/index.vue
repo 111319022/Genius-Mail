@@ -218,11 +218,11 @@
                     <Icon class="warning" icon="fe:warning" width="18" height="18"/>
                   </el-tooltip>
                 </div>
-                <div class="forward">
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px">
                   <span v-if="!setting.resendQuota">{{ $t('resendQuotaNone') }}</span>
                   <template v-else>
-                    <span v-if="setting.resendQuota.daily !== null" style="margin-right: 10px">{{ $t('resendQuotaDaily', { used: setting.resendQuota.daily, limit: 100 }) }}</span>
-                    <span v-if="setting.resendQuota.monthly !== null">{{ $t('resendQuotaMonthly', { used: setting.resendQuota.monthly, limit: 3000 }) }}</span>
+                    <el-tag v-if="setting.resendQuota.daily !== null">{{ $t('resendQuotaDaily', { used: setting.resendQuota.daily, limit: 100 }) }}</el-tag>
+                    <el-tag v-if="setting.resendQuota.monthly !== null">{{ $t('resendQuotaMonthly', { used: setting.resendQuota.monthly, limit: 3000 }) }}</el-tag>
                   </template>
                   <el-button class="opt-button" style="margin-top: 0" :loading="quotaLoading" size="small"
                              type="primary" :title="$t('resendQuotaRefresh')" @click="refreshResendQuota">
