@@ -60,12 +60,12 @@ onBeforeUnmount(() => {
 }
 
 .aside-show {
-  -webkit-box-shadow: var(--aside-right-border);
   box-shadow: var(--aside-right-border);
   transform: translateX(0);
   transition: all 100ms ease;
   z-index: 101;
   @media (max-width: 1025px) {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
     position: fixed;
     top: 0;
     left: 0;
@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(33, 37, 41, 0.4);
   z-index: 99;
   transition: all 0.3s;
 }

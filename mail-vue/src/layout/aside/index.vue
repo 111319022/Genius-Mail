@@ -2,10 +2,10 @@
   <el-scrollbar class="scroll">
     <div>
       <div class="title" >
-        <Icon icon="mdi:email-outline" width="24" height="24" />
+        <CoolFace :size="28" />
         <div>{{settingStore.settings.title}}</div>
       </div>
-      <el-menu :collapse="false" text-color="#fff" active-text-color="#fff" style="margin-top: 10px">
+      <el-menu :collapse="false" style="margin-top: 6px">
         <el-menu-item @click="router.push({name: 'email'})" index="email"
                       :class="route.meta.name === 'email' ? 'choose-item' : ''">
           <Icon icon="hugeicons:mailbox-01" width="20" height="20" />
@@ -74,6 +74,7 @@ import router from "@/router/index.js";
 import { useRoute } from "vue-router";
 import {Icon} from "@iconify/vue";
 import {useSettingStore} from "@/store/setting.js";
+import CoolFace from "@/components/cool-face/index.vue";
 
 const settingStore = useSettingStore();
 const route = useRoute();
@@ -83,66 +84,71 @@ const route = useRoute();
 <style lang="scss" scoped>
 
 .title {
-  margin: 15px 10px;
-  height: 45px;
-  border-radius: 6px;
+  margin: 14px 10px 8px;
+  height: 44px;
   display: flex;
   position: relative;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-  color: #ffffff;
-  background: linear-gradient(135deg, #1890ff, #3a80dd);
-  transition: all 0.3s ease;
+  gap: 10px;
+  color: var(--el-text-color-primary);
   max-width: 240px;
   padding: 0 10px;
   > div {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: calc(240px - 20px - 30px);
+    max-width: calc(240px - 20px - 38px);
   }
-
-  :deep(.el-icon) {
-    flex-shrink: 0;
-    font-size: 20px;
-  }
-
-  .user-right-icon {
-    align-self: center;
-    position: absolute;
-    font-size: 12px;
-    right: 8px;
-    color: #ffffff;
-  }
-
 }
 
 
 .manage-title {
-  margin-top: 10px;
+  margin-top: 18px;
+  margin-bottom: 4px;
   padding-left: 20px;
-  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--secondary-text-color);
 }
 
 .el-menu-item {
-  margin: 3px 10px !important;
-  border-radius: 6px;
+  position: relative;
+  margin: 2px 10px !important;
+  border-radius: var(--radius-sm);
   height: 36px;
   padding: 10px !important;
+  color: var(--aside-text-color);
+  transition: background-color 200ms ease-out, color 200ms ease-out;
 }
 
 .choose-item {
-  font-weight: 400;
+  font-weight: 500;
+  color: var(--el-color-primary) !important;
   background: var(--aside-menu-active-background) !important;
-  backdrop-filter: blur(4px);
+}
+
+.choose-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--el-color-primary);
 }
 
 @media (hover: hover) {
   .el-menu-item:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: var(--aside-menu-hover-background) !important;
+  }
+  .choose-item:hover {
+    background: var(--aside-menu-active-background) !important;
   }
 }
 
@@ -164,16 +170,15 @@ const route = useRoute();
 }
 
 .el-menu {
+  --el-menu-text-color: var(--aside-text-color);
+  --el-menu-hover-text-color: var(--aside-text-color);
+  --el-menu-active-color: var(--el-color-primary);
   border-right: 0;
   width: 260px;
 }
 
 :deep(.el-divider__text) {
   background: var(--aside-backgound);
-  color: #FFFFFF;
-}
-
-.scroll {
-
+  color: var(--aside-text-color);
 }
 </style>

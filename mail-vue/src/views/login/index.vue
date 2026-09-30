@@ -1,11 +1,17 @@
 <template>
   <div id="login-box" :style=" background ? 'background: var(--el-bg-color)' : ''" v-loading="oauthLoading" element-loading-text="登入中...">
     <div id="background-wrap" v-if="!settingStore.settings.background">
-      <div class="x1 cloud"></div>
-      <div class="x2 cloud"></div>
-      <div class="x3 cloud"></div>
-      <div class="x4 cloud"></div>
-      <div class="x5 cloud"></div>
+      <CoolFace class="float f1" :size="56" variant="grin"/>
+      <CoolFace class="float f2" :size="32" variant="wink"/>
+      <CoolFace class="float f3" :size="44" variant="heart"/>
+      <CoolFace class="float f4" :size="24" variant="tongue"/>
+      <CoolFace class="float f5" :size="36"/>
+      <CoolFace class="float f6" :size="28" variant="grin"/>
+      <div class="hero">
+        <CoolFace class="hero-face" :size="112"/>
+        <h1 class="hero-title">{{ settingStore.settings.title }}</h1>
+        <p class="hero-desc">{{ $t('loginHero') }}</p>
+      </div>
     </div>
     <div v-else :style="background"></div>
     <div class="form-wrapper">
@@ -145,13 +151,14 @@
       </div>
     </el-dialog>
     <a v-show="settingStore.settings.projectLink" class="github" href="https://github.com/maillab/cloud-mail">
-      <Icon icon="mingcute:github-line" color="#1890ff" width="20" height="20" />
+      <Icon icon="mingcute:github-line" color="#007BFF" width="20" height="20" />
     </a>
   </div>
 </template>
 
 <script setup>
 import router from "@/router";
+import CoolFace from "@/components/cool-face/index.vue";
 import {useRoute} from "vue-router";
 import {computed, nextTick, reactive, ref} from "vue";
 import {login} from "@/request/login.js";
@@ -258,7 +265,7 @@ window.loadBefore = (e) => {
 
 const loginOpacity = computed(() => {
   const opacity = settingStore.settings.loginOpacity
-  return uiStore.dark ? `rgba(0, 0, 0, ${opacity})` : `rgba(255, 255, 255, ${opacity})`
+  return uiStore.dark ? `rgba(26, 28, 31, ${opacity})` : `rgba(255, 255, 255, ${opacity})`
 })
 
 const hideLoginDomain = computed(() => settingStore.settings.loginDomain === 1)
@@ -655,7 +662,6 @@ function submitRegister() {
   width: 450px;
   height: 100%;
   border-left: 1px solid var(--login-border);
-  box-shadow: var(--el-box-shadow-light);
   @media (max-width: 1024px) {
     padding: 20px 18px;
     width: 384px;
@@ -664,7 +670,8 @@ function submitRegister() {
   @media (max-width: 767px) {
     border: 1px solid var(--login-border);
     padding: 20px 18px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--el-box-shadow-light);
     height: fit-content;
     width: 100%;
     margin-right: 18px;
@@ -672,9 +679,9 @@ function submitRegister() {
   }
 
   .btn {
-    height: 36px;
+    height: 40px;
     width: 100%;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
   }
 
   .form-desc {
@@ -684,8 +691,9 @@ function submitRegister() {
   }
 
   .form-title {
-    font-weight: bold;
-    font-size: 22px !important;
+    font-weight: 700;
+    font-size: 24px !important;
+    letter-spacing: -0.01em;
   }
 
   .switch {
@@ -699,22 +707,22 @@ function submitRegister() {
   }
 
   :deep(.el-input__wrapper) {
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     background: var(--el-bg-color);
   }
 
   .email-input :deep(.el-input__wrapper) {
-    border-radius: 6px 0 0 6px;
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
     background: var(--el-bg-color);
   }
 
   .el-input {
-    height: 38px;
+    height: 40px;
     width: 100%;
     margin-bottom: 18px;
 
     :deep(.el-input__inner) {
-      height: 36px;
+      height: 38px;
     }
   }
 }
@@ -765,7 +773,7 @@ function submitRegister() {
   padding-left: 8px !important;
   padding-right: 4px !important;
   background: var(--el-bg-color);
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
 :deep(.el-button+.el-button) {
@@ -796,8 +804,7 @@ function submitRegister() {
 
 
 #login-box {
-  background: linear-gradient(to bottom, #2980b9, #6dd5fa, #fff);
-  font: 100% Arial, sans-serif;
+  background: var(--el-bg-color-page);
   height: 100%;
   margin: 0;
   padding: 0;
@@ -806,78 +813,74 @@ function submitRegister() {
   grid-template-columns: 1fr;
 }
 
-
 #background-wrap {
+  position: relative;
   height: 100%;
   z-index: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 450px;
+  @media (max-width: 1024px) {
+    padding-right: 402px;
+  }
+  @media (max-width: 767px) {
+    padding-right: 0;
+  }
 }
 
-@keyframes animateCloud {
-  0% {
-    margin-left: -500px;
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 460px;
+  padding: 0 24px;
+  animation: fade-up 420ms var(--ease-out) both;
+  @media (max-width: 767px) {
+    display: none;
   }
 
-  100% {
-    margin-left: 100%;
+  .hero-face {
+    margin-bottom: 28px;
+  }
+
+  .hero-title {
+    font-size: clamp(2.25rem, 4vw, 3rem);
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--el-text-color-primary);
+    word-break: break-word;
+  }
+
+  .hero-desc {
+    margin-top: 16px;
+    font-size: 1rem;
+    max-width: 44ch;
+    color: var(--secondary-text-color);
   }
 }
 
-.x1 {
-  animation: animateCloud 30s linear infinite;
-  transform: scale(0.65);
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
 }
 
-.x2 {
-  animation: animateCloud 15s linear infinite;
-  transform: scale(0.3);
-}
-
-.x3 {
-  animation: animateCloud 25s linear infinite;
-  transform: scale(0.5);
-}
-
-.x4 {
-  animation: animateCloud 13s linear infinite;
-  transform: scale(0.4);
-}
-
-.x5 {
-  animation: animateCloud 20s linear infinite;
-  transform: scale(0.55);
-}
-
-.cloud {
-  background: linear-gradient(to bottom, #fff 5%, #f1f1f1 100%);
-  border-radius: 100px;
-  box-shadow: 0 8px 5px rgba(0, 0, 0, 0.1);
-  height: 120px;
-  width: 350px;
-  position: relative;
-}
-
-.cloud:after,
-.cloud:before {
-  content: "";
+.float {
   position: absolute;
-  background: #fff;
-  z-index: -1;
+  opacity: 0.9;
+  animation: float-y 6s ease-in-out infinite;
+  @media (max-width: 767px) {
+    display: none;
+  }
 }
 
-.cloud:after {
-  border-radius: 100px;
-  height: 100px;
-  left: 50px;
-  top: -50px;
-  width: 100px;
-}
-
-.cloud:before {
-  border-radius: 200px;
-  height: 180px;
-  width: 180px;
-  right: 50px;
-  top: -90px;
-}
+.f1 { left: 9%; top: 14%; animation-delay: 0s; }
+.f2 { left: 30%; top: 8%; animation-delay: -2s; opacity: 0.55; }
+.f3 { left: 14%; bottom: 14%; animation-delay: -4s; opacity: 0.7; }
+.f4 { left: 42%; bottom: 20%; animation-delay: -1s; opacity: 0.6; }
+.f5 { left: 44%; top: 26%; animation-delay: -3s; opacity: 0.5; }
+.f6 { left: 24%; bottom: 6%; animation-delay: -5s; opacity: 0.55; }
 
 </style>

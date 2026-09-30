@@ -19,8 +19,8 @@
       <div class="notice icon-item" @click="openNotice">
         <Icon icon="streamline-plump:announcement-megaphone"/>
       </div>
-      <el-dropdown ref="userinfoRef" @visible-change="e => userInfoShow = e" :teleported="false" popper-class="detail-dropdown">
-        <div class="avatar" @click="userInfoHide" >
+      <el-dropdown trigger="click" :teleported="false" popper-class="detail-dropdown">
+        <div class="avatar">
           <div class="avatar-text">
             <div>{{ formatName(userStore.user.email) }}</div>
           </div>
@@ -92,8 +92,6 @@ const settingStore = useSettingStore();
 const userStore = useUserStore();
 const uiStore = useUiStore();
 const logoutLoading = ref(false)
-const userInfoShow = ref(false)
-const userinfoRef = ref({})
 
 const accountCount = computed(() => {
   return userStore.user.role.accountCount
@@ -155,14 +153,6 @@ const sendCount = computed(() => {
 
   return userStore.user.sendCount + '/' + userStore.user.role.sendCount
 })
-
-function userInfoHide(e) {
-    if (userInfoShow.value) {
-        userinfoRef.value.handleClose()
-    } else {
-        userinfoRef.value.handleOpen()
-    }
-}
 
 async function copyEmail(email) {
   try {
@@ -228,7 +218,7 @@ function switchDark(nextIsDark, root) {
   root.setAttribute('class', nextIsDark ? 'dark' : '')
   const metaTag = document.getElementById('theme-color-meta');
   const isMobile =  !window.matchMedia("(pointer: fine) and (hover: hover)").matches;
-  metaTag.setAttribute('content', nextIsDark ? (isMobile ? '#141414' : '#000000') : (isMobile ? '#191A23' : '#F1F1F1'));
+  metaTag.setAttribute('content', nextIsDark ? '#141516' : (isMobile ? '#F8F8F8' : '#FFFFFF'));
   uiStore.dark = nextIsDark
 }
 
@@ -350,7 +340,7 @@ function formatName(email) {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
   }
 }
 
@@ -378,13 +368,22 @@ function formatName(email) {
   .writer {
     width: 34px;
     height: 34px;
-    border-radius: 50%;
+    border-radius: var(--radius-sm);
     color: #ffffff;
-    background: linear-gradient(135deg, #1890ff, #3a80dd);
-    transition: all 0.3s ease;
+    background: var(--el-color-primary);
+    transition: background-color 200ms ease-out, box-shadow 200ms ease-out, transform 200ms ease-out;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    &:hover {
+      background: var(--el-color-primary-dark-2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
 
     .writer-text {
       margin-left: 15px;
@@ -459,7 +458,7 @@ function formatName(email) {
       display: flex;
       justify-content: center;
       align-items: center;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--dark-border);
     }
 

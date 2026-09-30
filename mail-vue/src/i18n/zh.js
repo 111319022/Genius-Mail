@@ -127,6 +127,7 @@ const zh = {
     home: '返回首頁',
     loginBtn: '登入',
     regBtn: '註冊',
+    loginHero: '簡潔、快速的雲端信箱，讓收發信件回到最單純的樣子。',
     loginTitle: '輸入帳號資訊以開始使用信箱系統',
     regTitle: '輸入帳號密碼以開始註冊信箱系統',
     confirmPwd: '確認密碼',

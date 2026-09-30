@@ -127,6 +127,7 @@ const en = {
     home: 'Home',
     loginBtn: 'Sign in',
     regBtn: 'Sign up',
+    loginHero: 'Fast, minimal email. Everything you need, nothing more.',
     loginTitle: 'Sign in to your account to access email',
     regTitle: 'Sign up for an account to use email',
     confirmPwd: 'Confirm password',
