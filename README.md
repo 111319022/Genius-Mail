@@ -1,158 +1,167 @@
 <p align="center">
-    <img src="doc/demo/logo.png" width="80px" />
-    <h1 align="center">Cloud Mail</h1>
-    <p align="center">基于 Cloudflare 的简约响应式邮箱服务，支持邮件发送、附件收发 🎉</p> 
+    <img src="mail-vue/public/logo.svg" width="88px" />
+    <h1 align="center">Genius Mail</h1>
+    <p align="center">架在 Cloudflare 上的個人信箱服務，附原生 iOS App 與推播通知 😎</p>
     <p align="center">
-        简体中文 | <a href="/README-en.md" style="margin-left: 5px">English </a>
-    </p>
-    <p align="center">
-        <a href="https://github.com/maillab/cloud-mail/tree/main?tab=MIT-1-ov-file" target="_blank" >
-            <img src="https://img.shields.io/badge/license-MIT-green" />
-        </a>    
-        <a href="https://github.com/maillab/cloud-mail/releases" target="_blank" >
-            <img src="https://img.shields.io/github/v/release/maillab/cloud-mail" alt="releases" />
-        </a>  
-        <a href="https://github.com/maillab/cloud-mail/issues" >
-            <img src="https://img.shields.io/github/issues/maillab/cloud-mail" alt="issues" />
-        </a>  
-        <a href="https://github.com/maillab/cloud-mail/stargazers" target="_blank">
-            <img src="https://img.shields.io/github/stars/maillab/cloud-mail" alt="stargazers" />
-        </a>  
-        <a href="https://github.com/maillab/cloud-mail/forks" target="_blank" >
-            <img src="https://img.shields.io/github/forks/maillab/cloud-mail" alt="forks" />
-        </a>
-    </p>
-    <p align="center">
-        <a href="https://trendshift.io/repositories/20459" target="_blank" >
-            <img src="https://trendshift.io/api/badge/repositories/20459" alt="trendshift" >
-        </a>
+        <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" /></a>
+        <img src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" />
+        <img src="https://img.shields.io/badge/iOS-26%2B-000000?logo=apple&logoColor=white" />
     </p>
 </p>
 
+## 簡介
 
-## 项目简介
+Genius Mail 是跑在 Cloudflare Workers 上的 Serverless 信箱服務：一個網域就能建立多個信箱地址，收信、寄信、附件都不需要自己的伺服器。
 
-只需要一个域名，就可以创建多个不同的邮箱，类似各大邮箱平台，本项目支持署到 Cloudflare Workers ，降低服务器成本，搭建自己的邮箱服务
+本專案 fork 自 [maillab/cloud-mail](https://github.com/maillab/cloud-mail)，在原版的基礎上改成繁體中文、重新設計介面、加上註冊審核，並新增原生 iOS App 與 APNs 推播。
 
-## 项目展示
+- 網頁版：<https://mail.rayisgenius.cc>
+- iOS App：[iOS-App/](iOS-App/)（自用／TestFlight，未上架）
 
-- [在线演示](https://skymail.ink)<br>
-- [部署文档](https://doc.skymail.ink)<br>
+## 和原版 Cloud Mail 的差異
 
-| ![](/doc/demo/demo1.png) | ![](/doc/demo/demo2.png) |
-|-----------------------|-----------------------|
-| ![](/doc/demo/demo3.png) | ![](/doc/demo/demo4.png) |
+| 項目 | 說明 |
+|---|---|
+| 🇹🇼 繁體中文 | 前端、後端訊息與預設資料全面改為繁體中文（台灣用語），預設語言為繁中 |
+| 🎨 新介面 | 簡約的 B2B 風格、Inter 字型、淺色側欄，登入頁改為分割畫面與手繪表情符號；品牌改為 Genius Mail |
+| 📱 iOS App | SwiftUI 原生 App：收件匣、搜尋、寫信、附件預覽、驗證碼一鍵複製、多信箱切換 |
+| 🔔 APNs 推播 | 收到新信時推播到 iPhone，通知上可直接複製驗證碼、標為已讀或刪除 |
+| ✅ 註冊審核 | 新註冊的帳號需要管理員核准才能登入，待審核帳號不會收信，管理員信箱會收到申請通知 |
+| 📊 Resend 額度 | 系統設定與使用者選單顯示 Resend 已用額度，可手動重新整理 |
+| 🛠️ 附件修正 | `/attachments/`、`/static/` 改從實際設定的儲存空間（R2 / S3）讀取，並正確處理中文檔名 |
+| 🔍 新 API | 單封郵件、未讀數量、關鍵字搜尋、推播裝置註冊（見下方「新增的 API」） |
 
+## 功能
 
+- **💰 低成本**：部署在 Cloudflare Workers，搭配 D1、KV、R2，不需要伺服器
+- **📧 收發信**：用 Resend 寄信，支援群發、內嵌圖片與附件，可查看寄送狀態
+- **📦 附件**：收發附件，存放在 R2
+- **🔢 驗證碼辨識**：用 Workers AI 自動抓出郵件中的驗證碼
+- **📱 iOS App 與推播**：見 [iOS-App/README.md](iOS-App/README.md)
+- **💻 響應式網頁**：電腦與手機瀏覽器都能用，也可以加入主畫面當 PWA
+- **🛡️ 管理功能**：使用者與郵件管理、RBAC 權限、註冊審核
+- **🔁 轉寄**：收到的信可以轉到 Telegram Bot、其他信箱或 Webhook
+- **📡 開放 API**：用 API 批次建立使用者、多條件查詢郵件
+- **📈 數據統計**：用 ECharts 顯示系統數據與郵件成長
+- **🤖 人機驗證**：整合 Turnstile，防止機器人大量註冊
 
+## 技術棧
 
-## 功能介绍
+| 層級 | 技術 |
+|---|---|
+| 平台 | [Cloudflare Workers](https://developers.cloudflare.com/workers/) |
+| 後端 | [Hono](https://hono.dev/)、[Drizzle ORM](https://orm.drizzle.team/) |
+| 資料 | [D1](https://developers.cloudflare.com/d1/)（資料庫）、[KV](https://developers.cloudflare.com/kv/)（快取）、[R2](https://developers.cloudflare.com/r2/)（檔案） |
+| 網頁前端 | [Vue 3](https://vuejs.org/)、[Element Plus](https://element-plus.org/) |
+| iOS | SwiftUI（iOS 26+）、WKWebView、QuickLook |
+| 寄信 | [Resend](https://resend.com/) |
+| 推播 | Apple Push Notification service（Worker 直接以 ES256 JWT 呼叫 APNs） |
+| AI | Workers AI（驗證碼辨識） |
 
-- **💰 低成本使用**： 可部署到 Cloudflare Workers 降低服务器成本
-
-- **💻 响应式设计**：响应式布局自动适配PC和大部分手机端浏览器
-
-- **📧 邮件发送**：集成Resend发送邮件，支持群发，内嵌图片和附件发送，发送状态查看
-
-- **🛡️ 管理员功能**：可以对用户，邮件进行管理，RABC权限控制对功能及使用资源限制
-
-- **📦 附件收发**：支持收发附件，使用R2对象存储保存和下载文件
-
-- **🔔 邮件推送**：接收邮件后可以转发到TG机器人或其他服务商邮箱
-
-- **📡 开放API**：支持使用API批量生成用户，多条件查询邮件 
-
-- **🔢 验证码识别**：使用Workers AI，自动识别邮件验证码 
-
-- **📈 数据可视化**：使用ECharts对系统数据详情，用户邮件增长可视化显示
-
-- **🎨 个性化设置**：可以自定义网站标题，登录背景，透明度
-
-- **🤖 人机验证**：集成Turnstile人机验证，防止人机批量注册
-
-- **📜 更多功能**：正在开发中...
-
-
-
-## 技术栈
-
-- **平台**：[Cloudflare Workers](https://developers.cloudflare.com/workers/)
-
-- **Web框架**：[Hono](https://hono.dev/)
-
-- **ORM：**[Drizzle](https://orm.drizzle.team/)
-
-- **前端框架**：[Vue3](https://vuejs.org/) 
-
-- **UI框架**：[Element Plus](https://element-plus.org/) 
-
-- **邮件推送：** [Resend](https://resend.com/)
-
-- **缓存**：[Cloudflare KV](https://developers.cloudflare.com/kv/)
-
-- **数据库**：[Cloudflare D1](https://developers.cloudflare.com/d1/)
-
-- **文件存储**：[Cloudflare R2](https://developers.cloudflare.com/r2/)
-
-## 目录结构
+## 目錄結構
 
 ```
-cloud-mail
-├── mail-worker				    # worker后端项目
-│   ├── src                  
-│   │   ├── api	 			    # api接口层			
-│   │   ├── const  			    # 项目常量
-│   │   ├── dao                 # 数据访问层
-│   │   ├── email			    # 邮件处理接收
-│   │   ├── entity			    # 数据库实体
-│   │   ├── error			    # 自定义异常
-│   │   ├── hono			    # web框架配置、拦截器、全局异常等
-│   │   ├── i18n			    # 语言国际化
-│   │   ├── init			    # 数据库缓存初始化
-│   │   ├── model			    # 响应体数据封装
-│   │   ├── security			# 身份权限认证
-│   │   ├── service			    # 业务服务层
-│   │   ├── template			# 消息模板
-│   │   ├── utils			    # 工具类
-│   │   └── index.js			# 入口文件
-│   ├── pageckge.json			# 项目依赖
-│   └── wrangler.toml			# 项目配置
-│
-├── mail-vue				    # vue前端项目
+Genius-Mail
+├── mail-worker          # Cloudflare Worker 後端（Hono）
 │   ├── src
-│   │   ├── axios 			    # axios配置
-│   │   ├── components			# 自定义组件
-│   │   ├── echarts			    # echarts组件导入
-│   │   ├── i18n			    # 语言国际化
-│   │   ├── init			    # 入站初始化
-│   │   ├── layout			    # 主体布局组件
-│   │   ├── perm			    # 权限认证
-│   │   ├── request			    # api接口
-│   │   ├── router			    # 路由配置
-│   │   ├── store			    # 全局状态管理
-│   │   ├── utils			    # 工具类
-│   │   ├── views			    # 页面组件
-│   │   ├── app.vue			    # 入口组件
-│   │   ├── main.js			    # 入口js
-│   │   └── style.css			# 全局css
-│   ├── package.json			# 项目依赖
-└── └── env.release				# 项目配置
+│   │   ├── api          # API 路由
+│   │   ├── email        # 收信處理（Email Routing 進來的信）
+│   │   ├── service      # 商業邏輯（含 push-service.js：APNs 推播）
+│   │   ├── entity       # Drizzle 資料表定義
+│   │   ├── init         # 資料庫初始化與升級
+│   │   ├── security     # 登入驗證與權限
+│   │   └── i18n         # 後端訊息（繁中／英文）
+│   ├── wrangler.toml    # 正式環境設定
+│   └── wrangler-dev.toml
+├── mail-vue             # 網頁前端（Vue 3），build 到 mail-worker/dist
+└── iOS-App              # 原生 iOS App（SwiftUI）
+    ├── GeniusMail
+    └── GeniusMail.xcodeproj
 ```
 
-## 赞助
+## 部署
 
-<a href="https://doc.skymail.ink/support.html" >
-<img width="170px" src="./doc/images/support.png" alt="">
-</a>
+### 自動部署
 
-## 许可证
+`cloud-mail` Worker 已透過 **Cloudflare Workers Builds** 連結這個 GitHub repo：
 
-本项目采用 [MIT](LICENSE) 许可证	
+- push 到 `main` 就會自動 build 並部署（根目錄 `/mail-worker`，build 時會一併編譯 `mail-vue`）
+- 只改到 `iOS-App/`、`doc/` 或 `*.md` 的 push **不會**觸發部署
+- `.github/workflows/deploy-cloudflare.yml` 是原版專案留下的 workflow，目前已在 GitHub 上停用
 
+### 手動部署
 
-## 交流
+```bash
+cd mail-worker
+npx wrangler deploy
+```
 
-[Telegram](https://t.me/cloud_mail_tg)
+build 步驟會用到 `pnpm`；本機沒有安裝時，可以先執行 `npm i -g pnpm`。
 
+### Secrets
 
+機密設定都存成 Worker secret，不放在 repo 裡：
 
+| 名稱 | 說明 |
+|---|---|
+| `jwt_secret` | 登入 token 簽章金鑰，也用於資料庫初始化網址 |
+| `apns_key` | APNs 金鑰（`.p8` 檔內容） |
+| `apns_key_id` | APNs Key ID |
+| `apns_team_id` | Apple Developer Team ID |
+| `apns_bundle_id` | iOS App 的 Bundle ID（`cc.rayisgenius.GeniusMail`） |
+
+```bash
+cd mail-worker
+npx wrangler secret put jwt_secret
+```
+
+APNs 金鑰的申請步驟見 [iOS-App/README.md](iOS-App/README.md#啟用推播只需做一次)。
+
+### 資料庫初始化與升級
+
+第一次部署，或更新後有新增資料表欄位時，開啟一次：
+
+```
+https://mail.rayisgenius.cc/api/init/<jwt_secret>
+```
+
+## 本機開發
+
+```bash
+# 後端：http://127.0.0.1:8787
+cd mail-worker
+npx wrangler dev --config wrangler-dev.toml
+```
+
+第一次啟動後開啟 `http://127.0.0.1:8787/api/init/<wrangler-dev.toml 裡的 jwt_secret>` 建立本機資料庫。
+
+```bash
+# 前端：開發伺服器會呼叫 127.0.0.1:8787 的後端
+cd mail-vue
+pnpm install
+pnpm dev
+```
+
+iOS App 用 Xcode 開啟 `iOS-App/GeniusMail.xcodeproj`；在登入畫面的「伺服器設定」可以改成本機後端網址。
+
+## 新增的 API
+
+除了原版的 API，另外新增了這些（都需要登入）：
+
+| API | 說明 |
+|---|---|
+| `GET /api/email/detail?emailId=` | 取得單封郵件（含附件與星號狀態） |
+| `GET /api/email/unreadCount` | 未讀郵件數量 |
+| `GET /api/email/list?keyword=` | 郵件列表加上關鍵字搜尋（寄件人、收件人、主旨、內文） |
+| `POST /api/push/register` | 註冊 iOS 推播裝置 |
+| `DELETE /api/push/unregister` | 移除推播裝置 |
+| `GET /api/push/status` | 推播設定狀態與已註冊裝置 |
+| `POST /api/push/test` | 傳送測試通知到自己的裝置 |
+
+## 致謝
+
+- 原始專案：[maillab/cloud-mail](https://github.com/maillab/cloud-mail)，感謝原作者與所有貢獻者
+
+## 授權
+
+[MIT](LICENSE)
