@@ -1,4 +1,5 @@
 <template>
+  <div class="aside-wrap">
   <el-scrollbar class="scroll">
     <div>
       <div class="title" >
@@ -67,6 +68,8 @@
       </el-menu>
     </div>
   </el-scrollbar>
+  <div class="powered">Powered by Cloud Mail via Cloudflare</div>
+  </div>
 </template>
 
 <script setup>
@@ -82,6 +85,26 @@ const route = useRoute();
 </script>
 
 <style lang="scss" scoped>
+
+.aside-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 260px;
+  background: var(--aside-backgound);
+
+  .scroll {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.powered {
+  padding: 12px 20px;
+  font-size: 12px;
+  color: var(--secondary-text-color);
+  border-top: 1px solid var(--el-border-color-lighter);
+}
 
 .title {
   margin: 14px 10px 8px;

@@ -114,6 +114,7 @@
           <div class="switch" @click="show = 'login'" v-else>{{ $t('hasAccount') }} <span>{{ $t('loginSwitch') }}</span>
           </div>
         </template>
+        <div class="powered">Powered by Cloud Mail via Cloudflare</div>
       </div>
     </div>
     <el-dialog class="bind-dialog" v-model="showBindForm"  title="註冊信箱" >
@@ -637,6 +638,13 @@ function submitRegister() {
 </style>
 
 <style lang="scss" scoped>
+
+.powered {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--secondary-text-color);
+}
 
 .form-wrapper {
   position: fixed;
