@@ -3,7 +3,8 @@ import verifyRecordService from '../service/verify-record-service';
 export const userConst = {
 	status: {
 		NORMAL: 0,
-		BAN: 1
+		BAN: 1,
+		PENDING: 2
 	}
 }
 
@@ -77,6 +78,10 @@ export const settingConst = {
 		OPEN: 0,
 		CLOSE: 1,
 		OPTIONAL: 2,
+	},
+	regApprove: {
+		OPEN: 0,
+		CLOSE: 1,
 	},
 	receive: {
 		OPEN: 0,

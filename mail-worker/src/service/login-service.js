@@ -19,6 +19,7 @@ import dayjs from 'dayjs';
 import { toUtc } from '../utils/date-uitil';
 import { t } from '../i18n/i18n.js';
 import verifyRecordService from './verify-record-service';
+import approvalService from './approval-service';
 
 const loginService = {
 
@@ -26,7 +27,7 @@ const loginService = {
 
 		const { email, password, token, code } = params;
 
-		let { regKey, register, registerVerify, regVerifyCount, minEmailPrefix, emailPrefixFilter } = await settingService.query(c)
+		let { regKey, register, registerVerify, regVerifyCount, minEmailPrefix, emailPrefixFilter, regApprove } = await settingService.query(c)
 
 		if (oauth) {
 			registerVerify = settingConst.registerVerify.CLOSE;
@@ -128,7 +129,11 @@ const loginService = {
 
 		const { salt, hash } = await saltHashUtils.hashPassword(password);
 
-		const userId = await userService.insert(c, { email, regKeyId,password: hash, salt, type: type || defType });
+		// 开启注册审核时新用户为待审核状态，管理员账号除外
+		const pending = regApprove !== settingConst.regApprove.CLOSE && email.toLowerCase() !== c.env.admin?.toLowerCase();
+		const status = pending ? userConst.status.PENDING : userConst.status.NORMAL;
+
+		const userId = await userService.insert(c, { email, regKeyId,password: hash, salt, type: type || defType, status });
 
 		await accountService.insert(c, { userId: userId, email, name: emailUtils.getName(email) });
 
@@ -138,12 +143,16 @@ const loginService = {
 			await regKeyService.reduceCount(c, code, 1);
 		}
 
-		if (registerVerify === settingConst.registerVerify.COUNT && !regVerifyOpen) {
-			const row = await verifyRecordService.increaseRegCount(c);
-			return {regVerifyOpen: row.count >= regVerifyCount}
+		if (pending) {
+			await approvalService.notifyAdmin(c, email);
 		}
 
-		return {regVerifyOpen}
+		if (registerVerify === settingConst.registerVerify.COUNT && !regVerifyOpen) {
+			const row = await verifyRecordService.increaseRegCount(c);
+			return {regVerifyOpen: row.count >= regVerifyCount, pending}
+		}
+
+		return {regVerifyOpen, pending}
 
 	},
 
@@ -219,6 +228,10 @@ const loginService = {
 
 		if(userRow.status === userConst.status.BAN) {
 			throw new BizError(t('isBanUser'));
+		}
+
+		if(userRow.status === userConst.status.PENDING) {
+			throw new BizError(t('isPendingUser'));
 		}
 
 		if (!await cryptoUtils.verifyPassword(password, userRow.salt, userRow.password) && !noVerifyPwd) {

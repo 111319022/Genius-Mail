@@ -15,6 +15,7 @@
         <el-option :key="-1" :label="$t('all')" :value="-1"/>
         <el-option :key="0" :label="$t('active')" :value="0"/>
         <el-option :key="1" :label="$t('banned')" :value="1"/>
+        <el-option :key="2" :label="$t('pendingApproval')" :value="2"/>
         <el-option :key="-2" :label="$t('deleted')" :value="-2"/>
       </el-select>
       <Icon class="icon" icon="iconoir:search" @click="search" width="20" height="20"/>
@@ -82,6 +83,7 @@
               <el-tag disable-transitions v-if="props.row.isDel === 1" type="info">{{ $t('deleted') }}</el-tag>
               <el-tag disable-transitions v-else-if="props.row.status === 0" type="primary">{{ $t('active') }}</el-tag>
               <el-tag disable-transitions v-else-if="props.row.status === 1" type="danger">{{ $t('banned') }}</el-tag>
+              <el-tag disable-transitions v-else-if="props.row.status === 2" type="warning">{{ $t('pendingApproval') }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column v-if="typeShow" :label="$t('tabRole')" min-width="140" prop="type">
@@ -101,7 +103,11 @@
                     <el-dropdown-item @click="openSetPwd(props.row)" >{{ $t('chgPwd') }}</el-dropdown-item>
                     <el-dropdown-item @click="openSetType(props.row)" >{{ $t('perm') }}</el-dropdown-item>
                     <template v-if="props.row.type !== 0">
-                      <el-dropdown-item v-if="props.row.isDel !== 1" @click="setStatus(props.row)">
+                      <template v-if="props.row.isDel !== 1 && props.row.status === 2">
+                        <el-dropdown-item @click="approveUser(props.row)">{{ $t('approve') }}</el-dropdown-item>
+                        <el-dropdown-item @click="rejectUser(props.row)">{{ $t('reject') }}</el-dropdown-item>
+                      </template>
+                      <el-dropdown-item v-else-if="props.row.isDel !== 1" @click="setStatus(props.row)">
                         {{ setStatusName(props.row) }}
                       </el-dropdown-item>
                       <el-dropdown-item v-else @click="restore(props.row)">{{ $t('restore') }}</el-dropdown-item>
@@ -267,6 +273,8 @@
           </el-tag>
           <el-tag disable-transitions v-else-if="userDetails.status === 1" type="danger">{{ $t('banned') }}
           </el-tag>
+          <el-tag disable-transitions v-else-if="userDetails.status === 2" type="warning">{{ $t('pendingApproval') }}
+          </el-tag>
         </div>
         <div><span class="details-item-title">{{ $t('registrationIp') }}:</span>{{
             userDetails.createIp || $t('unknown')
@@ -333,7 +341,25 @@
               </div>
             </template>
           </el-dropdown-item>
-          <el-dropdown-item v-if="rightClickUser.type !== 0">
+          <template v-if="rightClickUser.type !== 0 && rightClickUser.isDel !== 1 && rightClickUser.status === 2">
+            <el-dropdown-item @click="approveUser(rightClickUser)">
+              <template #default>
+                <div class="right-dropdown-item">
+                  <Icon icon="ion:checkmark-circle-outline" style="margin-left: 1px;margin-right: 1px" width="19" height="19" />
+                  <span>{{ t('approveUser') }}</span>
+                </div>
+              </template>
+            </el-dropdown-item>
+            <el-dropdown-item @click="rejectUser(rightClickUser)">
+              <template #default>
+                <div class="right-dropdown-item">
+                  <Icon icon="ion:close-circle-outline" style="margin-left: 1px;margin-right: 1px" width="19" height="19" />
+                  <span>{{ t('rejectUser') }}</span>
+                </div>
+              </template>
+            </el-dropdown-item>
+          </template>
+          <el-dropdown-item v-else-if="rightClickUser.type !== 0">
             <template #default>
               <div class="right-dropdown-item" v-if="rightClickUser.isDel !== 1" @click="setStatus(rightClickUser)" >
                 <Icon icon="ion:reload" v-if="rightClickUser.status" style="margin-left: 1px;margin-right: 1px" width="19" height="19" />
@@ -905,6 +931,34 @@ function restore(user) {
 
 function setStatus(user) {
   httpSetStatus(user);
+}
+
+function approveUser(user) {
+  userSetStatus({status: 0, userId: user.userId}).then(() => {
+    user.status = 0
+    ElMessage({
+      message: t('approveSuccessMsg'),
+      type: "success",
+      plain: true
+    })
+  })
+}
+
+function rejectUser(user) {
+  ElMessageBox.confirm(t('rejectConfirm', {msg: user.email}), {
+    confirmButtonText: t('confirm'),
+    cancelButtonText: t('cancel'),
+    type: 'warning'
+  }).then(() => {
+    userDelete([user.userId]).then(() => {
+      ElMessage({
+        message: t('rejectSuccessMsg'),
+        type: "success",
+        plain: true
+      })
+      getUserList(true)
+    })
+  });
 }
 
 function httpSetStatus(user) {

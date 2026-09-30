@@ -22,11 +22,16 @@ const oauthService = {
 			throw new BizError('使用者已綁定信箱')
 		}
 
-		await loginService.register(c, { email, password: cryptoUtils.genRandomPwd(), code }, true);
+		const { pending } = await loginService.register(c, { email, password: cryptoUtils.genRandomPwd(), code }, true);
 
 		userRow = await userService.selectByEmail(c, email);
 
-		orm(c).update(oauth).set({ userId: userRow.userId }).where(eq(oauth.oauthUserId, oauthUserId)).run();
+		await orm(c).update(oauth).set({ userId: userRow.userId }).where(eq(oauth.oauthUserId, oauthUserId)).run();
+
+		if (pending) {
+			return { userInfo: oauthRow, token: null, pending };
+		}
+
 		const jwtToken = await loginService.login(c, { email, password: null }, true);
 
 		return { userInfo: oauthRow, token: jwtToken}

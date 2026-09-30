@@ -18,6 +18,13 @@
                 </div>
               </div>
               <div class="setting-item">
+                <div><span>{{ $t('regApprove') }}</span></div>
+                <div>
+                  <el-switch @change="change" :before-change="beforeChange" :active-value="0" :inactive-value="1"
+                             v-model="setting.regApprove"/>
+                </div>
+              </div>
+              <div class="setting-item">
                 <div><span>{{ $t('loginDomain') }}</span></div>
                 <div>
                   <el-switch @change="change" :before-change="beforeChange" :active-value="1" :inactive-value="0"

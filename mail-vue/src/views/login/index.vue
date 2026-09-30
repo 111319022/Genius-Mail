@@ -399,6 +399,17 @@ function bind() {
 
   bindLoading.value = true
   oauthBindUser(form).then(data => {
+    if (data.pending) {
+      bindLoading.value = false
+      showBindForm.value = false
+      ElMessage({
+        message: t('regPendingMsg'),
+        type: 'success',
+        plain: true,
+        duration: 6000,
+      })
+      return
+    }
     saveToken(data.token)
   }).catch(() => {
     bindLoading.value = false
@@ -587,7 +598,7 @@ function submitRegister() {
     code: registerForm.code
   }
 
-  register(form).then(({regVerifyOpen}) => {
+  register(form).then(({regVerifyOpen, pending}) => {
     show.value = 'login'
     registerForm.email = ''
     registerForm.password = ''
@@ -598,9 +609,10 @@ function submitRegister() {
     settingStore.settings.regVerifyOpen = regVerifyOpen
     verifyShow.value = false
     ElMessage({
-      message: t('regSuccessMsg'),
+      message: pending ? t('regPendingMsg') : t('regSuccessMsg'),
       type: 'success',
       plain: true,
+      duration: pending ? 6000 : 3000,
     })
   }).catch(res => {
 

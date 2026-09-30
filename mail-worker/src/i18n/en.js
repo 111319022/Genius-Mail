@@ -42,6 +42,7 @@ const en = {
 	notExistUser: 'Email does not exist',
 	isDelUser: 'This email has been deleted',
 	isBanUser: 'This email has been banned',
+	isPendingUser: 'Your account is awaiting admin approval',
 	regKeyUseCount: 'Usage count cannot be empty',
 	emptyRegKeyExpire: 'Valid until time cannot be empty',
 	isExistRegKye: 'Invite code already exists',

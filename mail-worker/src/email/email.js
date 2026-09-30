@@ -5,7 +5,7 @@ import settingService from '../service/setting-service';
 import attService from '../service/att-service';
 import constant from '../const/constant';
 import fileUtils from '../utils/file-utils';
-import { emailConst, isDel, settingConst } from '../const/entity-const';
+import { emailConst, isDel, settingConst, userConst } from '../const/entity-const';
 import emailUtils from '../utils/email-utils';
 import roleService from '../service/role-service';
 import userService from '../service/user-service';
@@ -80,6 +80,12 @@ export async function email(message, env, ctx) {
 
 		if (account) {
 			 userRow = await userService.selectByIdIncludeDel({ env: env }, account.userId);
+		}
+
+		// 待审核用户直接拒收，不占用存储
+		if (account && userRow?.status === userConst.status.PENDING) {
+			message.setReject('The recipient account is pending approval.');
+			return;
 		}
 
 		if (account && userRow.email !== env.admin) {

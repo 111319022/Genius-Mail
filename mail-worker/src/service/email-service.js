@@ -1,7 +1,7 @@
 import orm from '../entity/orm';
 import email from '../entity/email';
 import { emailListColumns, emailBriefColumns, EMAIL_LIST_TEXT_LEN } from '../lib/email-list-columns';
-import { attConst, emailConst, isDel, settingConst } from '../const/entity-const';
+import { attConst, emailConst, isDel, settingConst, userConst } from '../const/entity-const';
 import { and, desc, eq, gt, inArray, notInArray, lt, count, asc, sql, ne, or, like, lte, gte } from 'drizzle-orm';
 import { star } from '../entity/star';
 import settingService from './setting-service';
@@ -670,6 +670,11 @@ const emailService = {
 		const userIds = allAccounts.map(accountRow => accountRow.userId);
 		let roleList = await roleService.selectByUserIds(c, userIds);
 
+		//查询待审核的收件人
+		const pendingUserIds = userIds.length > 0 ? (await orm(c).select({ userId: user.userId }).from(user)
+			.where(and(inArray(user.userId, userIds), eq(user.status, userConst.status.PENDING))).all())
+			.map(row => row.userId) : [];
+
 		//封装数据库准备保存到数据库
 		const emailDataList = [];
 
@@ -707,7 +712,10 @@ const emailService = {
 				//如果收件人没有这个域名的使用权限和有邮件拦截，就把邮件改为拒收状态
 				if (email !== c.env.admin) {
 
-					if (!roleService.hasAvailDomainPerm(availDomain, email)) {
+					if (pendingUserIds.includes(accountRow.userId)) {
+						emailValues.status = emailConst.status.BOUNCED;
+						emailValues.message = `The recipient <${email}> is pending approval.`;
+					} else if (!roleService.hasAvailDomainPerm(availDomain, email)) {
 						emailValues.status = emailConst.status.BOUNCED;
 						emailValues.message = `The recipient <${email}> is not authorized to use this domain.`;
 					} else if(roleService.isBanEmail(banEmail, sendEmailData.sendEmail)) {

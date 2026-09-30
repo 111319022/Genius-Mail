@@ -42,6 +42,7 @@ const zh = {
 	notExistUser: '輸入的信箱不存在',
 	isDelUser: '該信箱已被註銷',
 	isBanUser: '該信箱已被停用',
+	isPendingUser: '帳號審核中，請等待管理員批准',
 	regKeyUseCount: '使用次數不能為空',
 	emptyRegKeyExpire: '有效時間不能為空',
 	isExistRegKye: '註冊碼已存在',
