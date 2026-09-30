@@ -26,9 +26,6 @@ bucket_name = "mail"		#r2对象存储桶的名字
 #[[send_email]]
 #name = "email"			#CF发件, 配置后优先使用
 
-[[send_email]]
-name = "email"			#Cloudflare Email Service 發信綁定，名稱固定為 email
-
 [ai]
 binding = "ai"
 
