@@ -3,7 +3,8 @@ import SwiftUI
 struct LoginView: View {
     @Environment(Session.self) private var session
 
-    @State private var email = UserDefaults.standard.string(forKey: "lastLoginEmail") ?? ""
+    @State private var username = Self.savedUsername
+    @State private var domain = Self.defaultDomain(for: APIClient.shared.serverURL)
     @State private var password = ""
     @State private var server = APIClient.shared.serverURL
     @State private var showServer = false
@@ -30,16 +31,23 @@ struct LoginView: View {
 
                 VStack(spacing: 12) {
                     field {
-                        Image(systemName: "at")
+                        Image(systemName: "person")
                             .foregroundStyle(.secondary)
-                        TextField("電子郵件", text: $email)
+                        TextField("帳號", text: $username)
                             .textContentType(.username)
-                            .keyboardType(.emailAddress)
+                            .keyboardType(.asciiCapable)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .focused($focus, equals: .email)
                             .submitLabel(.next)
                             .onSubmit { focus = .password }
+                        // 只输入 @ 前面的部分；若自己打了完整地址就不显示后缀
+                        if !username.contains("@") && !domain.isEmpty {
+                            Text("@\(domain)")
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .fixedSize(horizontal: true, vertical: false)
+                        }
                     }
                     field {
                         Image(systemName: "lock")
@@ -86,7 +94,7 @@ struct LoginView: View {
                     .padding(.vertical, 6)
                 }
                 .buttonStyle(.glassProminent)
-                .disabled(email.isEmpty || password.isEmpty || isLoading)
+                .disabled(username.isEmpty || password.isEmpty || isLoading)
 
                 Button(showServer ? "隱藏伺服器設定" : "伺服器設定") {
                     withAnimation(.snappy) { showServer.toggle() }
@@ -103,7 +111,8 @@ struct LoginView: View {
             LinearGradient(colors: [Color.yellow.opacity(0.18), Color(.systemBackground)], startPoint: .top, endPoint: .center)
                 .ignoresSafeArea()
         }
-        .onAppear { if email.isEmpty { focus = .email } }
+        .onAppear { if username.isEmpty { focus = .email } }
+        .task(id: server) { await loadDomain() }
     }
 
     private func field<Content: View>(@ViewBuilder content: () -> Content) -> some View {
@@ -113,8 +122,46 @@ struct LoginView: View {
             .background(.background.secondary, in: .rect(cornerRadius: 14))
     }
 
+    private var email: String {
+        let name = username.trimmingCharacters(in: .whitespaces)
+        return name.contains("@") || domain.isEmpty ? name : "\(name)@\(domain)"
+    }
+
+    private static var savedUsername: String {
+        let saved = UserDefaults.standard.string(forKey: "lastLoginEmail") ?? ""
+        let domain = defaultDomain(for: APIClient.shared.serverURL)
+        if !domain.isEmpty, saved.lowercased().hasSuffix("@" + domain.lowercased()) {
+            return String(saved.dropLast(domain.count + 1))
+        }
+        return saved
+    }
+
+    /// 预设使用伺服器网域（mail.rayisgenius.cc），载入网站设定后改用第一个信箱网域
+    private static func defaultDomain(for server: String) -> String {
+        var value = server.trimmingCharacters(in: .whitespaces)
+        if !value.hasPrefix("http") { value = "https://" + value }
+        return URL(string: value)?.host() ?? ""
+    }
+
+    private func loadDomain() async {
+        try? await Task.sleep(for: .milliseconds(300))
+        let target = server.isEmpty ? APIClient.defaultServer : server
+        domain = Self.defaultDomain(for: target)
+
+        // 登录前还没有 token，直接向该伺服器查询公开的网站设定
+        var base = target.trimmingCharacters(in: .whitespaces)
+        if !base.hasPrefix("http") { base = "https://" + base }
+        while base.hasSuffix("/") { base.removeLast() }
+        guard let url = URL(string: base + "/api/setting/websiteConfig"),
+              let (data, _) = try? await URLSession.shared.data(from: url),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let config = json["data"] as? [String: Any],
+              let first = (config["domainList"] as? [String])?.first else { return }
+        domain = first.hasPrefix("@") ? String(first.dropFirst()) : first
+    }
+
     private func login() async {
-        guard !email.isEmpty, !password.isEmpty, !isLoading else { return }
+        guard !username.isEmpty, !password.isEmpty, !isLoading else { return }
         focus = nil
         isLoading = true
         error = nil
